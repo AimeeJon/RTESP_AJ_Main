@@ -8,195 +8,164 @@
 
 Window::Window() : gain(5), count(0)
 {
-		int indexTop = 0;
-		int indexBottom = 0;
+    int indexTop = 0;
+    int indexBottom = 0;
 
-                zoomA = new QPushButton("Toggle Channel",this);
+    zoomA = new QPushButton("Toggle Channel",this);
 
-		connect( zoomA, SIGNAL (clicked()),this, SLOT (toggleChannel()) );
-		
-                zoomB = new QPushButton("Button 1");
-		
-                start = new QPushButton("Button 2");
-		
-                stop = new QPushButton("Button 3");
-		
-                print = new QPushButton("Button 4");
-		
-		curveTop = new QwtPlotCurve;
-		plotTop = new QwtPlot;
-		
-		curveBottom = new QwtPlotCurve;
-		plotBottom = new QwtPlot;
-		
-		for( indexTop=0; indexTop<plotDataSizeTop; ++indexTop )
-		{
-			xDataTop[indexTop] = indexTop;
-			//yDataTop[indexTop] = gain * sin( M_PI * indexTop/50);			
-			yDataTop[indexTop] = 0;
-		}
-		
-		for( indexBottom=0; indexBottom<plotDataSizeBottom; ++indexBottom )
-		{
-			xDataBottom[indexBottom] = indexBottom;
-			//yDataBottom[indexBottom] = gain * sin( M_PI * indexBottom/50);			
-			yDataBottom[indexBottom] = 0;
-		}
-		
-		curveTop->setSamples(xDataTop, yDataTop, plotDataSizeTop);
-		curveTop->attach(plotTop);
-		
-		curveBottom->setSamples(xDataBottom, yDataBottom, plotDataSizeBottom);
-		curveBottom->attach(plotBottom);
+    connect( zoomA, SIGNAL (clicked()),this, SLOT (toggleChannel()) );
+
+    zoomB = new QPushButton("Button 1");
+
+    start = new QPushButton("Button 2");
+
+    stop = new QPushButton("Button 3");
+
+    print = new QPushButton("Button 4");
+
+    curveTop = new QwtPlotCurve;
+    plotTop = new QwtPlot;
+
+    curveBottom = new QwtPlotCurve;
+    plotBottom = new QwtPlot;
+
+    for( indexTop=0; indexTop<plotDataSizeTop; ++indexTop )
+    {
+        xDataTop[indexTop] = indexTop;
+        //yDataTop[indexTop] = gain * sin( M_PI * indexTop/50);
+        yDataTop[indexTop] = 0;
+    }
+
+    for( indexBottom=0; indexBottom<plotDataSizeBottom; ++indexBottom )
+    {
+        xDataBottom[indexBottom] = indexBottom;
+        //yDataBottom[indexBottom] = gain * sin( M_PI * indexBottom/50);
+        yDataBottom[indexBottom] = 0;
+    }
+
+    curveTop->setSamples(xDataTop, yDataTop, plotDataSizeTop);
+    curveTop->attach(plotTop);
+
+    curveBottom->setSamples(xDataBottom, yDataBottom, plotDataSizeBottom);
+    curveBottom->attach(plotBottom);
 
 
-		plotTop->setTitle( "Skin Resistance" );
-		plotTop->setAxisTitle( QwtPlot::xBottom, "Time (Samples)" );
-		plotTop->setAxisTitle( QwtPlot::yLeft, "Resistance (k Ohms)" );
-		plotTop->setAxisScale(QwtPlot::xBottom,0, 10000, 0);
+    plotTop->setTitle( "Skin Resistance" );
+    plotTop->setAxisTitle( QwtPlot::xBottom, "Time (Samples)" );
+    plotTop->setAxisTitle( QwtPlot::yLeft, "Resistance (k Ohms)" );
+    plotTop->setAxisScale(QwtPlot::xBottom,0, 10000, 0);
 
-		plotBottom->setTitle( "Blood Pressure" );
-		plotBottom->setAxisTitle( QwtPlot::xBottom, "Time (Samples)" );
-		plotBottom->setAxisTitle( QwtPlot::yLeft, "Pressure (mmHg)" );
-		plotBottom->setAxisScale(QwtPlot::xBottom,0, 10000, 0);
-		
-		plotTop->replot();
-		plotTop->show();
-		
-		plotBottom->replot();
-		plotBottom->show();
-		
-		vLayoutLeft = new QVBoxLayout;
-		vLayoutLeft->addWidget(zoomA);
-		vLayoutLeft->addWidget(zoomB);
-		vLayoutLeft->addWidget(start);
-		vLayoutLeft->addWidget(stop);
-		vLayoutLeft->addWidget(print);
-		
-		vLayoutRight = new QVBoxLayout;
-		vLayoutRight->addWidget(plotTop);
-		vLayoutRight->addWidget(plotBottom);
-		
-		hLayout = new QHBoxLayout;
-		hLayout->addLayout(vLayoutLeft);
-		hLayout->addLayout(vLayoutRight);
-		
-		setLayout(hLayout);
+    plotBottom->setTitle( "Blood Pressure" );
+    plotBottom->setAxisTitle( QwtPlot::xBottom, "Time (Samples)" );
+    plotBottom->setAxisTitle( QwtPlot::yLeft, "Pressure (mmHg)" );
+    plotBottom->setAxisScale(QwtPlot::xBottom,0, 10000, 0);
 
-		//dataStore.push(20);
+    plotTop->replot();
+    plotTop->show();
 
-                adcreader = new ADCreader(&dataStore,&channelStore, &toggleOne,&toggleTwo);
-                adcreader->start();
-		
+    plotBottom->replot();
+    plotBottom->show();
+
+    vLayoutLeft = new QVBoxLayout;
+    vLayoutLeft->addWidget(zoomA);
+    vLayoutLeft->addWidget(zoomB);
+    vLayoutLeft->addWidget(start);
+    vLayoutLeft->addWidget(stop);
+    vLayoutLeft->addWidget(print);
+
+    vLayoutRight = new QVBoxLayout;
+    vLayoutRight->addWidget(plotTop);
+    vLayoutRight->addWidget(plotBottom);
+
+    hLayout = new QHBoxLayout;
+    hLayout->addLayout(vLayoutLeft);
+    hLayout->addLayout(vLayoutRight);
+
+    setLayout(hLayout);
+
+    adcreader = new ADCreader(&dataStore,&channelStore, &toggleOne,&toggleTwo);
+    adcreader->start();
+
 
 
 }
 
 
 Window::~Window() {
-	
-        adcreader->quit();
-	
-        adcreader->wait();
-        delete adcreader;
+
+    adcreader->quit();
+
+    adcreader->wait();
+    delete adcreader;
 }
 
 
 void Window::timerEvent( QTimerEvent *)
 {
-	int channelOne = dataStore.size();
-	double inVal = 0;
-	//double twoVal = 0;
-	int test = 0;
-	//int empty = dataStore.empty();
-	
-	//int channelTwo = channelStore.size();
-	//fprintf(stderr,"contain = %d  \r",contain);
+    // Finds the number of values in the ring buffer
+    int channelOne = dataStore.size();
 
-	for( int number=0; number<channelOne; ++number )
-	//fprintf(stderr,"test = %d \r",empty);
-	//while(channelOne > 0)
-	{
-  	  //printf("1\n");
-	  //while(channelOne > 0)
-	  //{
-	    inVal = dataStore.front();
-	    //stepOne = volt/gainOne;
-	    //stepTwo = stepOne/sbit;
-	    //inVal = inVal * 3300 / 65536 / 8;
-	    inVal = inVal * volt / sbit / gainOne;
+    // Sets the current plot value to 0
+    double inVal = 0;
 
-	    rTwo = rOne * ( inVal + 0.25 ) / ( vSupply - inVal - 0.25 ) / 1000;
-	    //fprintf(stderr,"test = %d          \r",stepOne);
+    // Runs a for loop for each value within the ring buffer
+    for( int number=0; number<channelOne; ++number )
+    {
+        // Gets the first value from the ring buffer
+        inVal = dataStore.front();
 
-	    dataStore.pop();
-	    //channelOne = dataStore.size();
+        // Converts the value to volts
+        inVal = inVal * volt / sbit / gainOne;
 
-	    //printf("test1\n");
+        // Converts the value to resistance (k ohms)
+        rTwo = rOne * ( inVal + 0.25 ) / ( vSupply - inVal - 0.25 ) / 1000;
 
-	    memmove( yDataTop, yDataTop+1, (plotDataSizeTop-1) * sizeof(double) );
-	    yDataTop[plotDataSizeTop-1] = rTwo;
-	  }
+        // Removes the value from the ring buffer
+        dataStore.pop();
 
-          curveTop->setSamples(xDataTop, yDataTop, plotDataSizeTop);
-	  plotTop->replot();
-	  
+        // Adds the value to the curve
+        memmove( yDataTop, yDataTop+1, (plotDataSizeTop-1) * sizeof(double) );
+        yDataTop[plotDataSizeTop-1] = rTwo;
+    }
 
-	  int channelTwo = channelStore.size();
-	  double twoVal = 0;
+    // Updates the plot with new values
+    curveTop->setSamples(xDataTop, yDataTop, plotDataSizeTop);
+    plotTop->replot();
 
-	  //printf("2\n");
-	  for( int numberTwo=0; numberTwo<channelTwo; ++numberTwo )
-	  {
-	    twoVal = channelStore.front();
-	    //test = twoVal * 3300 / 65536 / 32;
-	    twoVal = twoVal * volt / sbit / gainTwo;
+    // Finds the number of values in the ring buffer
+    int channelTwo = channelStore.size();
 
-	    twoVal = twoVal * 1.29 * 7.52 / 1000;
-	    //fprintf(stderr,"twoVal = %d\r", test);
+    // Sets the current plot value to 0
+    double twoVal = 0;
 
-	    channelStore.pop();
-	    //channelTwo = channelStore.size();
-	    //printf("test2\n");
+    // Runs a for loop for each value within the ring buffer
+    for( int numberTwo=0; numberTwo<channelTwo; ++numberTwo )
+    {
 
-	    memmove( yDataBottom, yDataBottom+1, (plotDataSizeBottom-1) * sizeof(double) );
-	    yDataBottom[plotDataSizeBottom-1] = twoVal;
-	  }
+        // Gets the first value from the ring buffer
+        twoVal = channelStore.front();
 
-	  curveBottom->setSamples(xDataBottom, yDataBottom, plotDataSizeBottom);
-	  plotBottom->replot();
-	  
-	  //fprintf(stderr,"inVal = %d\r",inVal);
-	  //printf("3\n");
-	  //printf("4\n");
-	  //printf("5\n");
-	  //double inVal = gain * sin( M_PI * count/50.0 );
-	  //++count;
-	  //printf("6\n");
-	  // add the new input to the plot
-	  //memmove( yDataTop, yDataTop+1, (plotDataSizeTop-1) * sizeof(double) );
-	  //yDataTop[plotDataSizeTop-1] = inVal;
-	  //curveTop->setSamples(xDataTop, yDataTop, plotDataSizeTop);
-	  //plotTop->replot();
+        // Converts the value to volts
+        twoVal = twoVal * volt / sbit / gainTwo;
 
-	  //printf("7\n");
-	  //memmove( yDataBottom, yDataBottom+1, (plotDataSizeBottom-1) * sizeof(double) );
-	  //yDataBottom[plotDataSizeBottom-1] = twoVal;
-	  //curveBottom->setSamples(xDataBottom, yDataBottom, plotDataSizeBottom);
-	  //plotBottom->replot();
-	  //printf("8\n");
-	  //dataStore.pop();
-	  //empty = dataStore.size();
-	  
-	  //curveTop->setSamples(xDataTop, yDataTop, plotDataSizeTop);
-	  //plotTop->replot();
+        // Converts the value to pressure (mmHg)
+        twoVal = twoVal * 1.29 * 7.52 / 1000;
 
-	  channelOne = dataStore.size();
-	  channelTwo = channelStore.size();
-	//}
+        // Removes the value from the ring buffer
+        channelStore.pop();
 
-	//plotTop->replot();
-	//plotBottom->replot();
+        // Adds the value to the curve
+        memmove( yDataBottom, yDataBottom+1, (plotDataSizeBottom-1) * sizeof(double) );
+        yDataBottom[plotDataSizeBottom-1] = twoVal;
+    }
+
+    // Updates the plot with new values
+    curveBottom->setSamples(xDataBottom, yDataBottom, plotDataSizeBottom);
+    plotBottom->replot();
+
+    // Updates the number of values in each ring buffer
+    channelOne = dataStore.size();
+    channelTwo = channelStore.size();
 }
 
 
@@ -204,7 +173,7 @@ void Window::timerEvent( QTimerEvent *)
 
 void Window::setGain(double gain)
 {
-	this->gain = gain;
+    this->gain = gain;
 }
 
 
@@ -215,20 +184,15 @@ void Window::setGain(double gain)
 
 void Window::toggleChannel()
 {
-
-	printf("test\n");
-	//fprintf(stderr,"Test = %d /r",toggleOne);
-
-	if(toggleOne == 1)
-	{
-	  toggleOne = 0;
-	  toggleTwo = 1;
-//	  zoomA->resize(100,50);
-	}
-	else
-	{
-	  toggleOne = 1;
-	  toggleTwo = 0;
-//	  zoomA->resize(50,100);
-	}
+    // Toggles the channel currently being measured and plotted
+    if(toggleOne == 1)
+    {
+        toggleOne = 0;
+        toggleTwo = 1;
+    }
+    else
+    {
+        toggleOne = 1;
+        toggleTwo = 0;
+    }
 }

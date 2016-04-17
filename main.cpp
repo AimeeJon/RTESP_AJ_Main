@@ -17,32 +17,14 @@
 #include "gpio-sysfs.h"
 
 
-//void testFunction()
-//{
-//
-//    while (true) {
-//        qDebug() << "Tick";
-//        sleep(1);
-//    }
-//}
-
-
-
 int main(int argc, char *argv[])
 {
-
-        //if (argc == 12345)
-        //{
-        //    readReg(0);
-        //}
 
 	QApplication app(argc, argv);
 
 	// create the window
 	Window window;
 	window.showMaximized();
-
-        //window.startThread();
 
 	// call the window.timerEvent function every 40 ms
         window.startTimer(40);

@@ -167,9 +167,8 @@ void ADCreader::run()
         sysfs_fd = gpio_fd_open(drdy_GPIO);
 
 
-	//while(1) {
         // resets the AD7705 so that it expects a write to the communication register
-        //printf("sending reset\n");
+        printf("sending reset\n");
         writeReset(fd);
 
         // tell the AD7705 that the next write will be to the clock register
@@ -182,93 +181,79 @@ void ADCreader::run()
         // intiates a self calibration and then after that starts converting
         writeReg(fd,0x58);
 
-	//writeReg(fd,0x01);
+
         // we read data in an endless loop and display it
         // this needs to run in a thread ideally
         while (1) {
 
+          // Sets the correct gain (8) for Channel 1
 	  writeReg(fd,0x10);
 	  writeReg(fd,0x58);
 
+          // While loop that runs while Channel 1 is toggled
 	  while(*selectOne == 1)
 	  {
-		//printf("1\n");
+                // tell the AD7705 to read the data register (16 bits)
 	  	writeReg(fd,0x38);
           	// let's wait for data for max one second
           	ret = gpio_poll(sysfs_fd,1000);
           	if (ret<1) {
             	fprintf(stderr,"Poll error %d %d\n",ret, sysfs_fd);
           	}
-	  	//printf("2\n");
-          	// tell the AD7705 to read the data register (16 bits)
-          	//writeReg(fd,0x38);
-	  	//sleep(0.1);
-	  	//printf("3\n");
+
           	// read the data register by performing two 8 bit reads
           	int value = readData(fd)-0x8000;
           	      //fprintf(stderr,"data = %d       \r",value);
-	  	//printf("4\n");
+
+                // If the buffer is not full, adds a new value to the buffer
 	  	if (threadQueue->size() < 1000) {
 	  		threadQueue->push(value);
 	  	}
-	  	//printf("5\n");
-	  	//threadQueue->push(value);
-          	int test = threadQueue->size();
-	  	//fprintf(stderr,"number = %d     \r",test);
+
                 // if stdout is redirected to a file or pipe, output the data
                 	if( no_tty )
                		{
                         	printf("%d\n", value);
                         	fflush(stdout);
                 	}
-	  	//printf("6\n");
-
-	  	//writeReg(fd,0x38);
-
-	  	//writeReset(fd);
-	  	//writeReg(fd,0x21);
-	  	//writeReg(fd,0x0C);
-	  	//writeReg(fd,0x11);
-	  	//writeReg(fd,0x40);
 	  }
 
+          // Sets the correct gain (64) for Channel 2
 	  writeReg(fd,0x10);
 	  writeReg(fd,0x78);
 
 	  while(*selectTwo == 1)
 	  {
 
-	  	writeReg(fd,0x39);
+                // tell the AD7705 to read the data register (16 bits)
+                writeReg(fd,0x39);
 
-	  	//sleep(100);
-	  	//printf("7\n");
+                // let's wait for data for max one second
 	  	ret = gpio_poll(sysfs_fd,1000);
 	  	if (ret<1) {
 	    	fprintf(stderr,"Poll error %d %d\n",ret, sysfs_fd);
 	  	}
 
-	  	//writeReg(fd,0x39);
-	  	//sleep(0.1);
-	  	//printf("8\n");
+                // read the data register by performing two 8 bit reads
 	  	int valueTwo = readData(fd)-0x8000;
 	  		//fprintf(stderr,"data = %d         \r", valueTwo);
-	  	//printf("9\n");
+
+                // If the buffer is not full, adds a new value to the buffer
 	  	if (channelQueue->size() < 1000) {
 	  		channelQueue->push(valueTwo);
 	  	}
-	  	//printf("10\n");
+
+                // if stdout is redirected to a file or pipe, output the data
 	  		if ( no_tty )
 	  		{
 	  			printf("%d\n", valueTwo );
 	  		}
-	  	//printf("11\n");
 	  }
         }
 
         close(fd);
         gpio_fd_close(sysfs_fd);
 
-        //return ret;
 }
 
 void ADCreader::quit()

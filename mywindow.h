@@ -28,9 +28,7 @@ public:
 	
 public slots:
 	void setGain(double gain);
-	//void startThread(void);
 	void toggleChannel();
-	//void toggleChannel();
 	
 private:
 	QPushButton	*zoomA;
@@ -67,7 +65,6 @@ private:
 	int toggleOne = 1;
 	int toggleTwo = 0;
 
-	int test = 0;
 	int gainOne = 8;
 	int gainTwo = 64;
 	int sbit = 65536;
@@ -76,9 +73,6 @@ private:
 	int rOne = 1000000;
 	double vSupply = 0.5;
 	double rTwo;
-
-	//double stepOne = 0;
-	//double stepTwo = 0;
 
 	std::thread readPin;
 	bool collect;
