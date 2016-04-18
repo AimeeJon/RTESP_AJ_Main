@@ -1,0 +1,1 @@
+Using this board design, it was nessary to hardwire the circuit to connect the bottom skin electrode point (JP2) to both ground and resistor R7 (22k) 
